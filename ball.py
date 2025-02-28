@@ -1,7 +1,10 @@
 import pygame, math, sys, os
 from pygame.locals import *
 
-rootpath = ''#'/mnt/lvm/home/chris/docs/Documents/Personal/tanks'
+rootpath = ''
+
+bounce_sound = pygame.mixer.Sound(os.path.join(rootpath, "snd", "hitwall.mp3"))
+
 
 class Ball(pygame.sprite.Sprite):
     """Bouncing ball used as a shot
@@ -26,6 +29,7 @@ class Ball(pygame.sprite.Sprite):
         self.life = life
         
     def reflect(self,sprite):
+        pygame.mixer.Sound.play(bounce_sound)
         if sprite.rect.collidepoint(self.rect.centerx,self.rect.top):
             self.velocityy = -self.velocityy
             self.update()

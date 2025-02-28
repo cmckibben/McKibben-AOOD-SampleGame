@@ -2,7 +2,9 @@ import pygame, math, sys, os
 from pygame.locals import *
 import level
 
-rootpath = ''#'/mnt/lvm/home/chris/docs/Documents/Personal/tanks'
+rootpath = ''
+
+move_sound = pygame.mixer.Sound(os.path.join(rootpath, "snd", "move.mp3"))
 
 TURNINGRATE = 1
 SPEED = 1
@@ -30,6 +32,7 @@ class Tank(pygame.sprite.Sprite):
        self.rect.center = self.position
            
     def move_forward(self, walls):
+        pygame.mixer.Sound.play(move_sound)
         x,y = self.position
         oldx, oldy = self.position
         x -= SPEED*math.cos(math.radians(self.angle))
@@ -41,6 +44,7 @@ class Tank(pygame.sprite.Sprite):
             self.update()
     
     def move_backward(self, walls):
+        pygame.mixer.Sound.play(move_sound)
         x,y = self.position
         oldx, oldy = self.position
         x += SPEED*math.cos(math.radians(self.angle))

@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../Dev/.idea/Dev.iml" filepath="$PROJECT_DIR$/../Dev/.idea/Dev.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/McKibben.iml" filepath="$PROJECT_DIR$/.idea/McKibben.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Garin/.idea/SampleGames.iml" filepath="$PROJECT_DIR$/../Garin/.idea/SampleGames.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Sienna/.idea/Sienna.iml" filepath="$PROJECT_DIR$/../Sienna/.idea/Sienna.iml" />
     </modules>
   </component>
 </project>

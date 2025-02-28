@@ -1,7 +1,7 @@
 import pygame, math, sys, os
 from pygame.locals import *
 
-rootpath = ''# '/mnt/lvm/home/chris/docs/Documents/Personal/tanks'
+rootpath = ''
 
 class Wall(pygame.sprite.Sprite):
     image = None
