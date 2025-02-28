@@ -1,6 +1,4 @@
-import pygame, math, sys, os
-from pygame.locals import *
-import level
+import pygame, math, os
 
 rootpath = ''
 
@@ -34,34 +32,31 @@ class Tank(pygame.sprite.Sprite):
     def move_forward(self, walls):
         pygame.mixer.Sound.play(move_sound)
         x,y = self.position
-        oldx, oldy = self.position
+        old_x, old_y = self.position
         x -= SPEED*math.cos(math.radians(self.angle))
         y += SPEED*math.sin(math.radians(self.angle))
         self.position = (x,y)
         self.update()
-        if(pygame.sprite.spritecollide(self, walls, False)):
-            self.position = (oldx,oldy)
+        if pygame.sprite.spritecollide(self, walls, False):
+            self.position = old_x,old_y
             self.update()
     
     def move_backward(self, walls):
         pygame.mixer.Sound.play(move_sound)
         x,y = self.position
-        oldx, oldy = self.position
+        old_x, old_y = self.position
         x += SPEED*math.cos(math.radians(self.angle))
         y -= SPEED*math.sin(math.radians(self.angle))
         self.position = (x,y)
-        if(pygame.sprite.spritecollide(self, walls, False)):
-            self.position = (oldx,oldy)
+        if pygame.sprite.spritecollide(self, walls, False):
+            self.position = (old_x,old_y)
             self.update()
     
     def rotate_right(self):
-        oldangle = self.angle
-        oldx, oldy = self.position
         self.angle -= TURNINGRATE
         if self.angle < 0: self.angle += 360
             
     def rotate_left(self):
-        oldangle = self.angle
         self.angle += TURNINGRATE
         if self.angle > 360: self.angle -= 360
         
@@ -69,5 +64,5 @@ class Tank(pygame.sprite.Sprite):
         x,y = self.position
         x -= TANKSIZE*math.cos(math.radians(self.angle))
         y += TANKSIZE*math.sin(math.radians(self.angle))
-        return (x,y)
+        return x,y
     

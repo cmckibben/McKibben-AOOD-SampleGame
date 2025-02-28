@@ -1,5 +1,4 @@
-import pygame, math, sys, os
-from pygame.locals import *
+import pygame, os
 
 rootpath = ''
 
@@ -100,14 +99,14 @@ Level3 = [
 [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
 [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
 
-def makelevel(level):
+def make_level(level):
     walls = pygame.sprite.Group()
-    levelchosen = Level1
-    if level == 2: levelchosen=Level2
-    if level == 3: levelchosen=Level3
+    level_chosen = Level1
+    if level == 2: level_chosen=Level2
+    if level == 3: level_chosen=Level3
     x = 0
     y = 0
-    for i in levelchosen:
+    for i in level_chosen:
         for j in i:
             if j==1:
                 walls.add(Wall((x*20 +10, y*20 +90)))

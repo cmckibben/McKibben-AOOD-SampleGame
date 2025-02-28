@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import pygame, math, sys, os, random
+import pygame, sys, os
 from pygame.locals import *
 pygame.init()
 import ball
@@ -7,23 +7,26 @@ import level
 import tank
 
 
-class Main:
+class Tanks:
     def __init__(self):
-        # Globals
+        # Class Variables
 
+        self.walls = None
+        self.player2 = None
+        self.player1 = None
         self.rootpath = ''
-        self.SCREENW = 800
-        self.SCREENH = 600
-        self.BALLSPEED = 4
-        self.SHOTDELAY = 10
-        self.player1delay = 0
-        self.player2delay = 0
-        self.Player1Score = 0
-        self.Player2Score = 0
+        self.SCREEN_W = 800
+        self.SCREEN_H = 600
+        self.BALL_SPEED = 4
+        self.SHOT_DELAY = 10
+        self.player1_delay = 0
+        self.player2_delay = 0
+        self.player1_score = 0
+        self.player2_score = 0
 
         self.THRESHOLD = 0.1
 
-        self.screen = pygame.display.set_mode((self.SCREENW, self.SCREENH))
+        self.screen = pygame.display.set_mode((self.SCREEN_W, self.SCREEN_H))
         pygame.display.set_caption('Tanks by Mr. McKibben')
         self.clock = pygame.time.Clock()
         background_file_name = os.path.join(self.rootpath, "gfx", "background.png")
@@ -33,7 +36,7 @@ class Main:
         self.balls = pygame.sprite.Group()
 
         self.boom_sound = pygame.mixer.Sound(os.path.join(self.rootpath, "snd", "boom.mp3"))
-        self.currentlevel = 1
+        self.current_level = 1
         self.points = 0
         # This dict can be left as-is, since pygame will generate a
         # pygame.JOYDEVICEADDED event for every joystick connected
@@ -46,8 +49,8 @@ class Main:
         while True:
             self.game_loop()
             if self.points % 4 == 0:
-                self.currentlevel += 1
-                if self.currentlevel > 3: self.currentlevel = 1
+                self.current_level += 1
+                if self.current_level > 3: self.current_level = 1
 
     def init_level(self):
         #### Initialize the level
@@ -55,9 +58,10 @@ class Main:
         self.player1 = pygame.sprite.GroupSingle(tank.Tank(1, (80, 340), 180))
         self.player2 = pygame.sprite.GroupSingle(tank.Tank(2, (720, 340), 0))
         self.balls.empty()
-        self.walls = level.makelevel(self.currentlevel)
+        self.walls = level.make_level(self.current_level)
 
-    def end_game(self):
+    @staticmethod
+    def end_game():
         print('Thanks for playing')
         pygame.quit()
         sys.exit(0)
@@ -79,7 +83,7 @@ class Main:
                 if event.type == pygame.QUIT:
                     self.end_game()
 
-                # Handle hotplugging of joysticks
+                # Handle hot plugging of joysticks
                 if event.type == pygame.JOYDEVICEADDED:
                     # This event will be generated when the program starts for every
                     # joystick, filling up the list without needing to create them manually.
@@ -93,76 +97,35 @@ class Main:
 
     ### Joystick input, only if a joystick is plugged in
             for joystick in self.joysticks.values():
-                if joystick.get_instance_id()==0:
-                    if joystick.get_button(0):
-                        if self.player1delay <= 0:
-                            self.balls.add(ball.Ball(self.BALLSPEED, self.player1.sprite.get_shot_location(), self.player1.sprite.angle))
-                            self.player1delay = self.SHOTDELAY
-                    if joystick.get_axis(1) > self.THRESHOLD: self.player1.sprite.move_backward(self.walls)
-                    if joystick.get_axis(1) < -self.THRESHOLD: self.player1.sprite.move_forward(self.walls)
-                    if joystick.get_axis(0) > self.THRESHOLD: self.player1.sprite.rotate_right()
-                    if joystick.get_axis(0) < -self.THRESHOLD: self.player1.sprite.rotate_left()
-                    if joystick.get_hat(0)[1] == -1: self.player1.sprite.move_backward(self.walls)
-                    if joystick.get_hat(0)[1] == 1: self.player1.sprite.move_forward(self.walls)
-                    if joystick.get_hat(0)[0] == -1: self.player1.sprite.rotate_left()
-                    if joystick.get_hat(0)[0] == 1: self.player1.sprite.rotate_right()
-                if joystick.get_instance_id()==1:
-                    if joystick.get_button(0):
-                        if self.player2delay <= 0:
-                            self.balls.add(ball.Ball(self.BALLSPEED, self.player2.sprite.get_shot_location(), self.player2.sprite.angle))
-                            self.player1delay = self.SHOTDELAY
-                    if joystick.get_axis(1) > self.THRESHOLD: self.player2.sprite.move_backward(self.walls)
-                    if joystick.get_axis(1) < -self.THRESHOLD: self.player2.sprite.move_forward(self.walls)
-                    if joystick.get_axis(0) > self.THRESHOLD: self.player2.sprite.rotate_right()
-                    if joystick.get_axis(0) < -self.THRESHOLD: self.player2.sprite.rotate_left()
-                    if joystick.get_hat(0)[1] == -1: self.player2.sprite.move_backward(self.walls)
-                    if joystick.get_hat(0)[1] == 1: self.player2.sprite.move_forward(self.walls)
-                    if joystick.get_hat(0)[0] == -1: self.player2.sprite.rotate_left()
-                    if joystick.get_hat(0)[0] == 1: self.player2.sprite.rotate_right()
+                self.process_joystick(joystick)
 
     #### Handle Keyboard Controls
-            if pygame.key.get_pressed()[K_w]: self.player1.sprite.move_forward(self.walls)
-            if pygame.key.get_pressed()[K_s]: self.player1.sprite.move_backward(self.walls)
-            if pygame.key.get_pressed()[K_d]: self.player1.sprite.rotate_right()
-            if pygame.key.get_pressed()[K_a]: self.player1.sprite.rotate_left()
-            if pygame.key.get_pressed()[K_SPACE]:
-                if self.player1delay <= 0:
-                    self.balls.add(ball.Ball(self.BALLSPEED, self.player1.sprite.get_shot_location(), self.player1.sprite.angle))
-                    self.player1delay = self.SHOTDELAY
-
-            if pygame.key.get_pressed()[K_UP]:   self.player2.sprite.move_forward(self.walls)
-            if pygame.key.get_pressed()[K_DOWN]: self.player2.sprite.move_backward(self.walls)
-            if pygame.key.get_pressed()[K_RIGHT]: self.player2.sprite.rotate_right()
-            if pygame.key.get_pressed()[K_LEFT]: self.player2.sprite.rotate_left()
-            if pygame.key.get_pressed()[K_RETURN]:
-                if self.player2delay <= 0:
-                    self.balls.add(ball.Ball(self.BALLSPEED, self.player2.sprite.get_shot_location(), self.player2.sprite.angle))
-                    self.player2delay = self.SHOTDELAY
+            self.process_keyboard()
 
     #### Step 3 Game Logic
     #### Handle if a player is destroyed
             if pygame.sprite.spritecollide(self.player1.sprite, self.balls, False):  # player 1 got shot
-                self.Player2Score += 1
+                self.player2_score += 1
                 self.points += 1
                 self.destroy(self.player1)
                 break
 
             if pygame.sprite.spritecollide(self.player2.sprite, self.balls, False):  # player 2 got shot
-                self.Player1Score += 1
+                self.player1_score += 1
                 self.points += 1
                 self.destroy(self.player2)
                 break
 
     #### Make the shots bounce
             collisions = pygame.sprite.groupcollide(self.balls, self.walls, False, False)
-            for ballcollide in collisions:
-                for wall in collisions[ballcollide]:
-                    ballcollide.reflect(wall)
+            for collide in collisions:
+                for wall in collisions[collide]:
+                    collide.reflect(wall)
 
 
     #### Decrement the delay until the next shot
-            if self.player1delay > 0: self.player1delay -= 1
-            if self.player2delay > 0: self.player2delay -= 1
+            if self.player1_delay > 0: self.player1_delay -= 1
+            if self.player2_delay > 0: self.player2_delay -= 1
 
     ##### update the sprites
             self.balls.update()
@@ -170,11 +133,11 @@ class Main:
             self.player2.update()
 
     #### Step 4 Draw the screen
-            score = str(self.Player1Score)
+            score = str(self.player1_score)
             text = self.font.render(score, True, (255, 255, 255))
             self.screen.blit(text, (20, 20))
 
-            score = str(self.Player2Score)
+            score = str(self.player2_score)
             text = self.font.render(score, True, (255, 255, 255))
             self.screen.blit(text, (760, 20))
 
@@ -187,6 +150,57 @@ class Main:
     #### Step 5 Wait until the next clock cycle to start the loop again
             self.clock.tick(30)  # 30 fps
 
+    def process_keyboard(self):
+        if pygame.key.get_pressed()[K_w]: self.player1.sprite.move_forward(self.walls)
+        if pygame.key.get_pressed()[K_s]: self.player1.sprite.move_backward(self.walls)
+        if pygame.key.get_pressed()[K_d]: self.player1.sprite.rotate_right()
+        if pygame.key.get_pressed()[K_a]: self.player1.sprite.rotate_left()
+        if pygame.key.get_pressed()[K_SPACE]:
+            if self.player1_delay <= 0:
+                self.balls.add(
+                    ball.Ball(self.BALL_SPEED, self.player1.sprite.get_shot_location(), self.player1.sprite.angle))
+                self.player1_delay = self.SHOT_DELAY
+        if pygame.key.get_pressed()[K_UP]:   self.player2.sprite.move_forward(self.walls)
+        if pygame.key.get_pressed()[K_DOWN]: self.player2.sprite.move_backward(self.walls)
+        if pygame.key.get_pressed()[K_RIGHT]: self.player2.sprite.rotate_right()
+        if pygame.key.get_pressed()[K_LEFT]: self.player2.sprite.rotate_left()
+        if pygame.key.get_pressed()[K_RETURN]:
+            if self.player2_delay <= 0:
+                self.balls.add(
+                    ball.Ball(self.BALL_SPEED, self.player2.sprite.get_shot_location(), self.player2.sprite.angle))
+                self.player2_delay = self.SHOT_DELAY
+
+    def process_joystick(self, joystick):
+        if joystick.get_instance_id() == 0:
+            player = self.player1
+        else:
+            player = self.player2
+
+        if joystick.get_button(0):
+            add_ball = False
+            if player == self.player1:
+                if self.player1_delay <= 0:
+                    add_ball = True
+                    self.player1_delay = self.SHOT_DELAY
+            if player == self.player2:
+                if self.player2_delay <= 0:
+                    add_ball = True
+                    self.player2_delay = self.SHOT_DELAY
+
+            if add_ball:
+                self.balls.add(ball.Ball(self.BALL_SPEED, player.sprite.get_shot_location(), player.sprite.angle))
+
+        if joystick.get_axis(1) > self.THRESHOLD: player.sprite.move_backward(self.walls)
+        if joystick.get_axis(1) < -self.THRESHOLD: player.sprite.move_forward(self.walls)
+        if joystick.get_axis(0) > self.THRESHOLD: player.sprite.rotate_right()
+        if joystick.get_axis(0) < -self.THRESHOLD: player.sprite.rotate_left()
+        if joystick.get_hat(0)[1] == -1: player.sprite.move_backward(self.walls)
+        if joystick.get_hat(0)[1] == 1: player.sprite.move_forward(self.walls)
+        if joystick.get_hat(0)[0] == -1: player.sprite.rotate_left()
+        if joystick.get_hat(0)[0] == 1: player.sprite.rotate_right()
+
+
+
 if __name__ == '__main__':
-    Main()
+    Tanks()
 
